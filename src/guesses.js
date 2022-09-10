@@ -1,4 +1,4 @@
-import React, { Component }  from 'react';
+import React from 'react';
 import SemantleGuess from './guess';
 
 const SemantleGuesses = ({guesses_dict, latest_guess}) =>
@@ -53,7 +53,7 @@ const SemantleGuesses = ({guesses_dict, latest_guess}) =>
     );
 };
 
-const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_number, player_stats}) => {
+const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_number, player_stats, display_similar_words, toggle_similar_words_display}) => {
     
     /* Go through the word dictionary and pick the top 100 words. 
     For each word, if it is in "guesses", boldface. 
@@ -71,37 +71,62 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
         />
         )
 
-
     return (
         <div id="solution">
             Hai indovinato! La parola di oggi è <b> "{correct_word}"</b>.
 
-            Ecco le cento parole più vicine a "{correct_word}":
-            <table className="smaller-table">
-            <thead>
-                <tr key="header">
-                    <th key="guess_number">#</th>{/* Guess number */}
-                    <th key="word">Parola</th>{/* Guess */}
-                    <th key="similarity">Similarità</th>{/* Similarity */}
-                    <th key="temperature">🌡️</th>{/* Temperature */}
-                    <th key="progress">Progresso</th>{/* How close */}
-                </tr>
-            </thead>
-           
-            <tbody>
-                {closest_words_annotated}
-            </tbody>
-        </table>
-        <SemantleStats guesses={{guesses}} puzzle_number={puzzle_number}
-        />
-        <br></br>
+            <form onSubmit={
+                    (_sub)=>{
+                        const stats_text = document.getElementById("stats-text");
+                        console.log("div")
+                        console.log(stats_text.textContent);
+                        navigator.clipboard.writeText(stats_text.textContent);
+                        _sub.preventDefault();
+                    }
+                }>
+                <input id="share_button" type="submit" value="🥳 Condividi 🎉"/>
+            </form>
+
+            {/* <SemantleStatsReact guesses={{guesses}} puzzle_number={puzzle_number} />
+            <br/> */}
+            <div id="stats-text" style={{display: "none"}}>
+            <SemantleStatsText guesses={{guesses}} puzzle_number={puzzle_number} />
+            </div>
+
+            <div id="similar-words">
+                Ecco le cento parole più vicine a "{correct_word}":
+                <button type="button" className="collapsible" onClick={
+                    (_sub)=>{
+                        toggle_similar_words_display();
+                        _sub.preventDefault();
+                    }}
+                >{display_similar_words==="block" ? "-": "+"}</button>
+                <div style={{display: display_similar_words}}>
+                    <table className="smaller-table">
+                        <thead>
+                            <tr key="header">
+                                <th key="guess_number">#</th>{/* Guess number */}
+                                <th key="word">Parola</th>{/* Guess */}
+                                <th key="similarity">Similarità</th>{/* Similarity */}
+                                <th key="temperature">🌡️</th>{/* Temperature */}
+                                <th key="progress">Progresso</th>{/* How close */}
+                            </tr>
+                        </thead>
+                
+                        <tbody>
+                            {closest_words_annotated}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         <PlayerStats player_stats={player_stats}/>
         </div>
     )
 }
 
-const SemantleStats = ({guesses, puzzle_number}) => {
-    const ordered_states_map = ["cold", "cool", 1000, 100, 10, 1, 0].reverse()
+const SemantleStatsData = ({guesses, puzzle_number}) => {
+    const ordered_states_list = ["cold", "cool", 1000, 100, 10, 1, 0].reverse()
     // "🧊",
     // "🥶",
     // "😎",
@@ -143,7 +168,16 @@ const SemantleStats = ({guesses, puzzle_number}) => {
         }
     }
 
-    const graphical_stats = ordered_states_map.map((_stat)=>
+    return [ordered_states_list, ordered_status_emojis, stats];
+}
+
+const SemantleStatsReact = ({guesses, puzzle_number})=> {
+
+    let statsData = SemantleStatsData({guesses, puzzle_number});
+
+    const ordered_states_list=statsData[0], ordered_status_emojis=statsData[1], stats=statsData[2];
+
+    const graphical_stats = ordered_states_list.map((_stat)=>
     {
         return(
         <tr key={_stat}>
@@ -153,7 +187,7 @@ const SemantleStats = ({guesses, puzzle_number}) => {
     })
     return(
         <div>
-            Ho indovinato Semantle #{puzzle_number} in {Object.keys(guesses.guesses).length} tentativi!
+            Ho indovinato Semant🇮🇹it #{puzzle_number} in {Object.keys(guesses.guesses).length} tentativi!
             <table>
                 <tbody>
                     {graphical_stats}
@@ -163,18 +197,45 @@ const SemantleStats = ({guesses, puzzle_number}) => {
     )
 }
 
+const SemantleStatsText = ({guesses, puzzle_number})=> {
+    // So so ugly!
+    let guess_counter = 0;
+    for (let i in guesses.guesses) {
+        guess_counter += 1;
+    }
+
+    let statsData = SemantleStatsData({guesses, puzzle_number});
+
+    const ordered_states_list=statsData[0], ordered_status_emojis=statsData[1], stats=statsData[2];
+
+    let textStats = "Ho indovinato Semant🇮🇹it #" +String(puzzle_number)+" in " +guess_counter +" tentativi!\n";
+
+    const textStatsContent = ordered_states_list.map((_stat)=>
+        {
+            return(
+                (ordered_status_emojis[_stat] + " : " +  stats[_stat])
+            )
+        }
+    )
+
+    textStatsContent.forEach(st => { textStats += (st + "\n") });
+    return textStats;
+}
+
 const PlayerStats = ({player_stats}) =>
 {
     return(
         <div>
-        <div id="semantle_stats">
+        <div id="semantit_stats">
             <div>
             Parole trovate dall'inizio del gioco: {player_stats.days_played}
-            </div><div>
-            Numero di tentativi: media {player_stats.mean_number_of_guesses}, minimo {player_stats.min_number_of_guesses}, massimo {player_stats.max_number_of_guesses}.
-            </div><div>
-            Streak: {player_stats.streak} giorni
             </div>
+            <div>
+            Numero di tentativi: media {player_stats.mean_number_of_guesses}, minimo {player_stats.min_number_of_guesses}, massimo {player_stats.max_number_of_guesses}.
+            </div>
+            {/* <div>
+            Streak: {player_stats.streak} giorni
+            </div> */}
         </div>
         </div>
     );

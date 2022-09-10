@@ -61,6 +61,18 @@ form {
   font-size: 1.2em;
 }
 
+#share_button{
+  width: 60%;
+  min-height: 1.5em;
+  font-size: 1.2em;
+  font-weight: bold;
+  color:green;
+  background-color:ivory;
+  
+  margin:0 auto;
+  display:block;
+}
+
 .styled-table {
   border-collapse: collapse;
   margin: 25px 0;
@@ -83,4 +95,21 @@ form {
   border:1px solid black;
   background-color: lavender;
   width:fit-content
+}
+
+#similar-words {
+  border:1px solid black;
+  background-color: lavenderblush;
+  /* width:fit-content; */
+  margin:.1em;
+}
+
+.collapsible {
+  font-size: 20px;
+  font-weight: bolder;
+  color: black;
+  float: right;
+  /* margin-left: 5px; */
+  border: 0pt;
+  background-color: transparent;
 }

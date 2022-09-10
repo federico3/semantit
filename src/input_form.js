@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 const SemantleInputForm = ({input_updater, on_change_updater}) =>
 {

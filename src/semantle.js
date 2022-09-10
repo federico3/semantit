@@ -1,9 +1,9 @@
-import React, { Component }  from 'react';
+import React from 'react';
 import {SemantleGuesses, SemantleGuessed} from './guesses';
 import {SemantleStatus, SemantleInfo} from './semantle_status';
 import SemantleInputForm from './input_form';
-import { useMatomo } from '@jonkoops/matomo-tracker-react'
 import MatomoTracker from '@jonkoops/matomo-tracker'
+import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
 
 class Semantle extends React.Component {
     constructor(props) {
@@ -12,7 +12,6 @@ class Semantle extends React.Component {
         // const { trackPageView, trackEvent } = useMatomo();
         this.tracker = new MatomoTracker({urlBase: 'https://matomo.federico.io/matomo/', siteId: 2})
         const dateiso = new Date().toISOString().slice(0,10);
-        console.log(new Date().toISOString());
         // let datestr = today.toString();
 
         // React.useEffect(() => {
@@ -42,6 +41,7 @@ class Semantle extends React.Component {
             guesses: {
             },
             guess_number: 0,
+            display_similar_words: "none",
             error: "",
             info: "Sto caricando le parole di oggi...",
         }
@@ -272,12 +272,20 @@ class Semantle extends React.Component {
                 closest_words_list={this.state.closest_words_list}
                 puzzle_number={this.state.day_stats.puzzle_number}
                 player_stats={this.state.player_stats}
+                display_similar_words={this.state.display_similar_words}
+                toggle_similar_words_display={()=> {
+                    if (this.state.display_similar_words === "block") {
+                        this.setState({display_similar_words: "none"});
+                    } else {
+                        this.setState({display_similar_words: "block"});
+                    }
+                }}
             />
         }
 
         return(
             <div>
-                <h1>Semantle</h1>
+                <h1>Semant🇮🇹it</h1>
                 <div>
                     <SemantleInfo 
                     semantle_status_props={{

@@ -1,6 +1,6 @@
-# Semantix
+# Semant🇮🇹it
 
-An open-source version of [Semantle](semantle.com)/[Cémantix](https://cemantix.herokuapp.com/) developed in React.
+An open-source version of [Semantle](semantle.com)/[Cémantix](https://cemantix.herokuapp.com/) developed in React and using a database of Italian words.
 
 ## Embeddings
 
@@ -8,7 +8,7 @@ We use pre-trained Italian word embeddings from [fastText](https://fasttext.cc).
 
 ## Word list
 
-We use the word list from [Napolux](https://github.com/napolux/paroleitaliane). The list of 1k common words is used for solutions, and the list of 95k words is used to screen for valid words.
+The list of 1k common words from [Napolux](https://github.com/napolux/paroleitaliane) is used for acceptable solutions. The [list of words in Debian's Italian spell checker](https://packages.debian.org/sid/witalian) is used to screen for valid words.
 
 ## Usage
 

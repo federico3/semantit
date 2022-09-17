@@ -233,9 +233,9 @@ const PlayerStats = ({player_stats}) =>
             <div>
             Numero di tentativi: media {player_stats.mean_number_of_guesses}, minimo {player_stats.min_number_of_guesses}, massimo {player_stats.max_number_of_guesses}.
             </div>
-            {/* <div>
-            Streak: {player_stats.streak} giorni
-            </div> */}
+            {<div>
+            Streak: {player_stats.streak} {(player_stats.streak === 1 ? "giorno" : "giorni")}.
+            </div>}
         </div>
         </div>
     );

@@ -113,3 +113,16 @@ form {
   border: 0pt;
   background-color: transparent;
 }
+
+.blurry{
+  color: transparent;
+  text-shadow: 0 0 8px #000;
+}
+
+.hidden{
+  display: none;
+}
+
+.visible{
+  display: inline;
+}

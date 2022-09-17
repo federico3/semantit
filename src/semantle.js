@@ -11,7 +11,11 @@ class Semantle extends React.Component {
         
         // const { trackPageView, trackEvent } = useMatomo();
         this.tracker = new MatomoTracker({urlBase: 'https://matomo.federico.io/matomo/', siteId: 2})
-        const dateiso = new Date().toISOString().slice(0,10);
+        const date = new Date();
+        const dateiso = date.toISOString().slice(0,10);
+        const yesterdays_date = new Date();
+        yesterdays_date.setDate(date.getDate()-1);
+        const yesterdays_date_iso = yesterdays_date.toISOString().slice(0,10);
         // let datestr = today.toString();
 
         // React.useEffect(() => {
@@ -20,6 +24,7 @@ class Semantle extends React.Component {
 
         this.state = {
             date: dateiso,
+            yesterdate: yesterdays_date_iso,
             word_database: {},
             day_stats: {
                 puzzle_number: -1,
@@ -44,6 +49,8 @@ class Semantle extends React.Component {
             display_similar_words: "none",
             error: "",
             info: "Sto caricando le parole di oggi...",
+            yesterdays_word: "la parola di ieri",
+            yesterdays_words: "le dieci parole di ieri",
         }
 
         // this.handleChange = this.handleChange.bind(this);
@@ -109,7 +116,9 @@ class Semantle extends React.Component {
                         nearest_word_similarity: -1,
                         tenth_nearest_word_similarity: -1,
                         thousandth_nearest_word_similarity: -1,
-                    }
+                    },
+                    yesterdays_word: "la parola locale di ieri",
+                    yesterdays_words: "le dieci parole locali di ieri",
                 },
             )
         } else {
@@ -143,6 +152,30 @@ class Semantle extends React.Component {
                 });
             }
             );
+
+            fetch(process.env.PUBLIC_URL +"/"+this.state.yesterdate+"/closest.json")
+            .then(res => res.json())
+            .then(
+            (result) => {
+                let yesterwords = "";
+                for (let i=1; i<10; i++) {
+                    yesterwords += '"' + result[i]['w'] + '", '
+                }
+                yesterwords += ' e "' + result[10]['w'] + '"'
+                this.setState({
+                    yesterdays_word: result[0]['w'],
+                    yesterdays_words: yesterwords,
+                })
+                console.log(result[0]['w']);
+                return;
+            },
+            (error) => {
+                console.log(error);
+                this.setState({
+                    error: "Errore nel caricare le statistiche di ieri! " + error
+                });
+            }
+            );
         }
 
         const gameState = JSON.parse(localStorage.getItem("gameState"));
@@ -160,7 +193,7 @@ class Semantle extends React.Component {
                     }
                 )
                 _player_streak = gameState.player_stats.streak;
-            } else if (false) { /*TODO */
+            } else if (gameStateDate===this.state.yesterdate) { /*TODO */
                 _player_streak = gameState.player_stats.streak;
             } else {
                 _player_streak = 0;
@@ -246,7 +279,7 @@ class Semantle extends React.Component {
     }
 
     handleSubmit(new_submission) {
-        let new_guess = new_submission.target.guess.value.toLowerCase();
+        let new_guess = new_submission.target.guess.value.toLowerCase().trim();
         this.addWord(new_guess);
         new_submission.preventDefault();
         new_submission.target.guess.value="";
@@ -296,6 +329,8 @@ class Semantle extends React.Component {
                         thousandth_nearest_word_similarity: this.state.day_stats.thousandth_nearest_word_similarity,
                         error: this.state.error,
                         info: this.state.info,
+                        yesterdays_word: this.state.yesterdays_word,
+                        yesterdays_words: this.state.yesterdays_words,
                     }}
                     />
                     <br/>
@@ -315,6 +350,8 @@ class Semantle extends React.Component {
                         thousandth_nearest_word_similarity: this.state.day_stats.thousandth_nearest_word_similarity,
                         error: this.state.error,
                         info: this.state.info,
+                        yesterdays_word: this.state.yesterdays_word,
+                        yesterdays_words: this.state.yesterdays_words,
                     }}
                     />
 
@@ -330,6 +367,7 @@ class Semantle extends React.Component {
                 <form onSubmit={this.resetHistory}>
                     <input id="reset_button" type="submit" value=" ⚠️ Reset ⚠️"/>
                 </form>
+                <div style={{fontSize: "15%", margin: "0 auto", display: "block",}}> Made with ❤️ by <a href="https://www.federico.io">Federico</a>.</div>
             </div>
         );
     }

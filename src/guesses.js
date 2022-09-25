@@ -231,7 +231,7 @@ const PlayerStats = ({player_stats}) =>
             Parole trovate dall'inizio del gioco: {player_stats.days_played}
             </div>
             <div>
-            Numero di tentativi: media {player_stats.mean_number_of_guesses}, minimo {player_stats.min_number_of_guesses}, massimo {player_stats.max_number_of_guesses}.
+            Numero di tentativi: media {Math.round(player_stats.mean_number_of_guesses*100)/100.}, minimo {player_stats.min_number_of_guesses}, massimo {player_stats.max_number_of_guesses}.
             </div>
             {<div>
             Streak: {player_stats.streak} {(player_stats.streak === 1 ? "giorno" : "giorni")}.

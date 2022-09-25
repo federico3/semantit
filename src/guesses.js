@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SemantleGuess from './guess';
+import useWindowSize from 'react-use/lib/useWindowSize'
+import Confetti from 'react-confetti'
 
 const SemantleGuesses = ({guesses_dict, latest_guess}) =>
 {
@@ -53,7 +55,7 @@ const SemantleGuesses = ({guesses_dict, latest_guess}) =>
     );
 };
 
-const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_number, player_stats, display_similar_words, toggle_similar_words_display}) => {
+const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_number, player_stats, display_similar_words, toggle_similar_words_display, guesses_to_solve}) => {
     
     /* Go through the word dictionary and pick the top 100 words. 
     For each word, if it is in "guesses", boldface. 
@@ -71,14 +73,31 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
         />
         )
 
+    const { width, height } = useWindowSize()
+
+    // let celebrate = true;
+    let [celebrate, setCelebrate] = useState(true);
+    
+    const confetti_duration_ms = 5000;
+    setInterval(()=>{setCelebrate(false)},confetti_duration_ms);
+
     return (
         <div id="solution">
+            <Confetti
+                width={width}
+                height={height}
+                numberOfPieces={celebrate? 500 : 0}
+                recycle={true}
+                // onConfettiComplete={confetti => {
+                //   setCelebrate(false);
+                //   confetti.reset();
+                // }}
+            />
             Hai indovinato! La parola di oggi è <b> "{correct_word}"</b>.
 
             <form onSubmit={
                     (_sub)=>{
                         const stats_text = document.getElementById("stats-text");
-                        console.log("div")
                         console.log(stats_text.textContent);
                         navigator.clipboard.writeText(stats_text.textContent);
                         _sub.preventDefault();
@@ -87,10 +106,10 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
                 <input id="share_button" type="submit" value="🥳 Condividi 🎉"/>
             </form>
 
-            {/* <SemantleStatsReact guesses={{guesses}} puzzle_number={puzzle_number} />
-            <br/> */}
+            {/* <SemantleStatsText guesses={{guesses}} puzzle_number={puzzle_number} guesses_to_solve={guesses_to_solve} /> */}
+            {/* <br/> */}
             <div id="stats-text" style={{display: "none"}}>
-            <SemantleStatsText guesses={{guesses}} puzzle_number={puzzle_number} />
+            <SemantleStatsText guesses={{guesses}} puzzle_number={puzzle_number} guesses_to_solve={guesses_to_solve}/>
             </div>
 
             <div id="similar-words">
@@ -125,7 +144,7 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
     )
 }
 
-const SemantleStatsData = ({guesses, puzzle_number}) => {
+const SemantleStatsData = ({guesses, puzzle_number, guesses_to_solve}) => {
     const ordered_states_list = ["cold", "cool", 1000, 100, 10, 1, 0].reverse()
     // "🧊",
     // "🥶",
@@ -150,30 +169,32 @@ const SemantleStatsData = ({guesses, puzzle_number}) => {
     }
     
     for (let guess in guesses.guesses){
-        if (guesses.guesses[guess].r===0){
-            stats[0] += 1;
-        } else if (guesses.guesses[guess].r<2) {
-            stats[1] += 1;
-        } else if (guesses.guesses[guess].r<10) {
-            stats[10] += 1;
-        } else if (guesses.guesses[guess].r<100) {
-            stats[100] += 1;
-        } else if (guesses.guesses[guess].r<1000) {
-            stats[1000] += 1;
-        }
-        else if (guesses.guesses[guess].s>0) {
-            stats["cool"] += 1;
-        } else {
-            stats["cold"] += 1;
+        if (guesses.guesses[guess].guess_number <= guesses_to_solve){
+            if (guesses.guesses[guess].r===0){
+                stats[0] += 1;
+            } else if (guesses.guesses[guess].r<2) {
+                stats[1] += 1;
+            } else if (guesses.guesses[guess].r<10) {
+                stats[10] += 1;
+            } else if (guesses.guesses[guess].r<100) {
+                stats[100] += 1;
+            } else if (guesses.guesses[guess].r<1000) {
+                stats[1000] += 1;
+            }
+            else if (guesses.guesses[guess].s>0) {
+                stats["cool"] += 1;
+            } else {
+                stats["cold"] += 1;
+            }
         }
     }
 
     return [ordered_states_list, ordered_status_emojis, stats];
 }
 
-const SemantleStatsReact = ({guesses, puzzle_number})=> {
+const SemantleStatsReact = ({guesses, puzzle_number, guesses_to_solve})=> {
 
-    let statsData = SemantleStatsData({guesses, puzzle_number});
+    let statsData = SemantleStatsData({guesses, puzzle_number, guesses_to_solve});
 
     const ordered_states_list=statsData[0], ordered_status_emojis=statsData[1], stats=statsData[2];
 
@@ -181,13 +202,13 @@ const SemantleStatsReact = ({guesses, puzzle_number})=> {
     {
         return(
         <tr key={_stat}>
-            <th>{ordered_status_emojis[_stat]}: </th><th>{stats[_stat]}</th>
+            <th>{ordered_status_emojis[_stat].repeat(Math.max(1,Math.ceil(stats[_stat]/10)))}: </th><th>{stats[_stat]}</th>
         </tr> 
         )
     })
     return(
         <div>
-            Ho indovinato Semant🇮🇹it #{puzzle_number} in {Object.keys(guesses.guesses).length} tentativi!
+            Ho indovinato Semant🇮🇹it #{puzzle_number} in {guesses_to_solve} tentativi!
             <table>
                 <tbody>
                     {graphical_stats}
@@ -197,23 +218,26 @@ const SemantleStatsReact = ({guesses, puzzle_number})=> {
     )
 }
 
-const SemantleStatsText = ({guesses, puzzle_number})=> {
+const SemantleStatsText = ({guesses, puzzle_number, guesses_to_solve})=> {
     // So so ugly!
-    let guess_counter = 0;
-    for (let i in guesses.guesses) {
-        guess_counter += 1;
+    if (guesses_to_solve === undefined || guesses_to_solve <1 ){
+        let guesses_length = 0;
+        for (let i in guesses.guesses) {
+            guesses_length += 1;
+        }
+        guesses_to_solve = guesses_length;
     }
 
-    let statsData = SemantleStatsData({guesses, puzzle_number});
+    let statsData = SemantleStatsData({guesses, puzzle_number, guesses_to_solve});
 
     const ordered_states_list=statsData[0], ordered_status_emojis=statsData[1], stats=statsData[2];
 
-    let textStats = "Ho indovinato Semant🇮🇹it #" +String(puzzle_number)+" in " +guess_counter +" tentativi!\n";
+    let textStats = "Ho indovinato Semant🇮🇹it #" +String(puzzle_number)+" in " +guesses_to_solve +" tentativi!\n";
 
     const textStatsContent = ordered_states_list.map((_stat)=>
         {
             return(
-                (ordered_status_emojis[_stat] + " : " +  stats[_stat])
+                (ordered_status_emojis[_stat].repeat(Math.max(1,Math.ceil(stats[_stat]/10))) + ": " +  stats[_stat])
             )
         }
     )

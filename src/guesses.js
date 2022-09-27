@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SemantleGuess from './guess';
 import useWindowSize from 'react-use/lib/useWindowSize'
+import useWindowScroll from 'react-use/lib/useWindowScroll'
 import Confetti from 'react-confetti'
 
 const SemantleGuesses = ({guesses_dict, latest_guess}) =>
@@ -73,21 +74,27 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
         />
         )
 
-    const { width, height } = useWindowSize()
+    const { width, height } = useWindowSize();
+    // const {scrollX, scrollY} = useWindowScroll();
 
     // let celebrate = true;
     let [celebrate, setCelebrate] = useState(true);
     
     const confetti_duration_ms = 5000;
+    // const confetti_delay_ms = 1000;
+    // setInterval(()=>{setCelebrate(true)},confetti_delay_ms);
     setInterval(()=>{setCelebrate(false)},confetti_duration_ms);
+
+
 
     return (
         <div id="solution">
             <Confetti
                 width={width}
-                height={height}
+                height={height+window.pageYOffset}
                 numberOfPieces={celebrate? 500 : 0}
                 recycle={true}
+                // confettiSource={{x: scrollX, y: scrollY, w: width, h:0 }}
                 // onConfettiComplete={confetti => {
                 //   setCelebrate(false);
                 //   confetti.reset();

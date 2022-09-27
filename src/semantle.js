@@ -3,7 +3,7 @@ import {SemantleGuesses, SemantleGuessed} from './guesses';
 import {SemantleStatus, SemantleInfo} from './semantle_status';
 import SemantleInputForm from './input_form';
 import MatomoTracker from '@jonkoops/matomo-tracker'
-import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
+// import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
 
 class Semantle extends React.Component {
     constructor(props) {
@@ -38,10 +38,12 @@ class Semantle extends React.Component {
                 min_number_of_guesses: Number.MAX_SAFE_INTEGER,
                 max_number_of_guesses: 0,
                 streak: 0,
+                win_streak: 0,
             },
             closest_words_list: [],
             latest_guess: "",
             solution_word: "",
+            guesses_to_solve: -1,
             solved: false,
             guesses: {
             },
@@ -55,6 +57,7 @@ class Semantle extends React.Component {
 
         // this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.solutionInformationRef = React.createRef();
     }
 
     componentDidMount() {
@@ -166,7 +169,6 @@ class Semantle extends React.Component {
                     yesterdays_word: result[0]['w'],
                     yesterdays_words: yesterwords,
                 })
-                console.log(result[0]['w']);
                 return;
             },
             (error) => {
@@ -183,6 +185,7 @@ class Semantle extends React.Component {
         if (gameState){
             const gameStateDate = gameState.date;
             let _player_streak = 0;
+            let _player_win_streak = 0;
             if (gameStateDate === this.state.date) {
                 this.setState(
                     {
@@ -190,13 +193,20 @@ class Semantle extends React.Component {
                         latest_guess: gameState.latest_guess,
                         guess_number: gameState.guess_number,
                         solved: gameState.solved,
+                        guesses_to_solve: gameState.guesses_to_solve,
                     }
                 )
                 _player_streak = gameState.player_stats.streak;
-            } else if (gameStateDate===this.state.yesterdate) { /*TODO */
+                _player_win_streak = gameState.player_stats.win_streak;
+            // } else if (gameStateDate===this.state.yesterdate && gameState.solved === true) { /*TODO and we won yesterday */
+            } else if (gameStateDate===this.state.yesterdate) { /* We deliberately count whether we played, not whether we won - or it would be a boring streak*/ 
                 _player_streak = gameState.player_stats.streak;
+                if (gameState.solved === true && gameState.player_stats.win_streak != undefined ) {
+                    _player_win_streak = gameState.player_stats.win_streak;
+                }
             } else {
                 _player_streak = 0;
+                _player_win_streak = 0;
             }
 
             let _player_stats= {
@@ -205,6 +215,7 @@ class Semantle extends React.Component {
                 min_number_of_guesses: gameState.player_stats.min_number_of_guesses,
                 max_number_of_guesses: gameState.player_stats.max_number_of_guesses,
                 streak: _player_streak,
+                win_streak: _player_win_streak,
             }
             this.setState(
                 {
@@ -246,12 +257,15 @@ class Semantle extends React.Component {
                     _player_stats.min_number_of_guesses = Math.min(_player_stats.min_number_of_guesses, _guess_number);
                     _player_stats.mean_number_of_guesses = ((_player_stats.days_played-1)*_player_stats.mean_number_of_guesses+_guess_number)/_player_stats.days_played;
                     _player_stats.streak+=1;
+                    _player_stats.win_streak+=1;
                     this.setState(
                         {
                             solved: _solved,
                             solution_word: new_guess,
+                            guesses_to_solve: _guess_number,
                         }
                     );
+                    this.solutionInformationRef.current.scrollIntoView({behavior: 'smooth'});
                 }
             }
             this.setState({
@@ -265,6 +279,7 @@ class Semantle extends React.Component {
             guess_number: _guess_number,
             solved: _solved,
             player_stats: _player_stats,
+            guesses_to_solve: ((!_solved && this.state.guesses[new_guess]["r"] === 0)? _guess_number : this.state.guesses_to_solve),
         }
         localStorage.setItem("gameState", JSON.stringify(gameState));
         } else {
@@ -313,6 +328,7 @@ class Semantle extends React.Component {
                         this.setState({display_similar_words: "block"});
                     }
                 }}
+                guesses_to_solve={this.state.guesses_to_solve}
             />
         }
 
@@ -334,7 +350,7 @@ class Semantle extends React.Component {
                     }}
                     />
                     <br/>
-                    {solution_information}
+                    <div ref={this.solutionInformationRef}>{solution_information}</div>
 
                     <SemantleInputForm
                         input_updater={this.handleSubmit}

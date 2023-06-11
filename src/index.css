@@ -8,6 +8,12 @@ body {
   font-size: large;
   max-width: 1200px;
 }
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: antiquewhite;
+  }
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
@@ -35,6 +41,10 @@ code {
 }
 
 table thead th { border-bottom: 1px solid #000; }
+@media (prefers-color-scheme: dark) {
+  table thead th { border-bottom: 1px solid antiquewhite;
+  }
+}
 
 table tbody th{
   margin: 0;
@@ -56,6 +66,17 @@ form {
   font-size: 1.2em;
   border-radius: 0.375rem;
 }
+
+@media (prefers-color-scheme: dark) {
+  #guess {
+    background-color: Gainsboro;
+    color:#121212
+  }
+  /* #guess::placeholder {
+    color:antiquewhite
+  }  */
+}
+
 #guess_button, #hint_button, #reset_button {
   border-radius: 0.375rem;
 }
@@ -73,6 +94,12 @@ form {
   font-size: 1em;
   background-color:lightgreen;
 }
+@media (prefers-color-scheme: dark) {
+  #hint_button {
+    background-color:darkgreen;
+    color:antiquewhite
+  }
+}
 
 #hint_form {
   min-height: 1.8em;
@@ -86,6 +113,12 @@ form {
   min-height: 1em;
   font-size: .8em;
   border-radius: 0.375rem;
+}
+@media (prefers-color-scheme: dark) {
+  #reset_button {
+    background-color: dimgray;
+    color:antiquewhite
+  }
 }
 
 #share_button{
@@ -101,6 +134,12 @@ form {
 
   border-radius: 0.375rem;
 }
+@media (prefers-color-scheme: dark) {
+  #share_button {
+    background-color:steelblue;
+    color:antiquewhite
+  }
+}
 
 .styled-table {
   border-collapse: collapse;
@@ -110,6 +149,26 @@ form {
   width: 100%;
   max-width: 800px
 }
+
+.guesses{
+  font-weight: normal;
+  color: black;
+}
+
+.guesses_highlighted{
+  font-weight: bold;
+  color: blue;
+}
+@media (prefers-color-scheme: dark) {
+  .guesses{
+    color: antiquewhite;
+  }
+  
+  .guesses_highlighted{
+    color:chartreuse;
+  }
+}
+
 
 .smaller-table {
   border-collapse: collapse;
@@ -133,6 +192,16 @@ form {
   margin:.1em;
 }
 
+@media (prefers-color-scheme: dark) {
+  #solution{
+    background-color:darkgreen;
+  }
+  #similar-words {
+    background-color: slateblue;
+  }
+}
+
+
 .collapsible {
   font-size: 20px;
   font-weight: bolder;
@@ -146,6 +215,11 @@ form {
 .blurry{
   color: transparent;
   text-shadow: 0 0 8px #000;
+}
+@media (prefers-color-scheme: dark) {
+  .blurry{
+    text-shadow: 0 0 8px antiquewhite;
+  }
 }
 
 .hidden{

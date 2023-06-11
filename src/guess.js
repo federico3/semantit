@@ -43,14 +43,16 @@ const SemantleGuess = ({semantle_word_guess, number, highlight}) =>
 {
     let font_weight = "normal";
     let font_color = "#000"
+    let guess_class="guesses"
     if (highlight){
         font_weight = "bold";
         font_color = "rgb(0 0 255)"
+        guess_class="guesses guesses_highlighted"
     }
     return(
         <tr key={semantle_word_guess.r}>
-            <th key="guess_number" style={{fontWeight: font_weight, color: font_color}}>{number}</th>{/*Guess number*/}
-            <th key="word" style={{fontWeight: font_weight, color: font_color}}>{semantle_word_guess.w}</th>{/* Guess */}
+            <th className={guess_class} key="guess_number" >{number}</th>{/*Guess number*/}
+            <th className={guess_class} key="word" >{semantle_word_guess.w}</th>{/* Guess */}
             <th key="similarity">{semantle_word_guess.s}</th>{/* Similarity */}
             <th key="temperature"><TempWidget similarity={semantle_word_guess.s} rank={semantle_word_guess.r}/></th>{/* Temperature */}
             <th key="progress"><ProgressWidget rank={semantle_word_guess.r}/></th>{/* How close */}

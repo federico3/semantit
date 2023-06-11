@@ -314,7 +314,7 @@ class Semantle extends React.Component {
         } else {
             this.setState(
                 {
-                    error: new_guess + " non è una parola valida.",
+                    error: "Non conosco la parola " +new_guess + ".",
                     info: null,
                 }
             )

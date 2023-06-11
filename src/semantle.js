@@ -2,6 +2,7 @@ import React from 'react';
 import {SemantleGuesses, SemantleGuessed} from './guesses';
 import {SemantleStatus, SemantleInfo} from './semantle_status';
 import SemantleInputForm from './input_form';
+import SemantleHintsForm from './hints_form';
 import MatomoTracker from '@jonkoops/matomo-tracker'
 // import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
 
@@ -48,15 +49,19 @@ class Semantle extends React.Component {
             guesses: {
             },
             guess_number: 0,
+            closest_guess_rank: 100000,
             display_similar_words: "none",
             error: "",
             info: "Sto caricando le parole di oggi...",
             yesterdays_word: "la parola di ieri",
             yesterdays_words: "le dieci parole di ieri",
+            remaining_hints: 4,
+            max_hints: 4
         }
 
         // this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleHint = this.handleHint.bind(this);
         this.solutionInformationRef = React.createRef();
     }
 
@@ -186,7 +191,15 @@ class Semantle extends React.Component {
             const gameStateDate = gameState.date;
             let _player_streak = 0;
             let _player_win_streak = 0;
-            if (gameStateDate === this.state.date) {
+            let _remaining_hints = this.state.max_hints;
+            let _closest_guess_rank = 100000;
+            if (gameStateDate === this.state.date) { // Resuming today's play
+                if (gameState.remaining_hints !== undefined) {
+                    _remaining_hints = gameState.remaining_hints;
+                }
+                if (gameState.closest_guess_rank !== undefined) {
+                    _closest_guess_rank = gameState.closest_guess_rank;
+                }
                 this.setState(
                     {
                         guesses: gameState.guesses,
@@ -194,17 +207,20 @@ class Semantle extends React.Component {
                         guess_number: gameState.guess_number,
                         solved: gameState.solved,
                         guesses_to_solve: gameState.guesses_to_solve,
+                        remaining_hints: _remaining_hints,
+                        closest_guess_rank: _closest_guess_rank,
                     }
                 )
+
                 _player_streak = gameState.player_stats.streak;
                 _player_win_streak = gameState.player_stats.win_streak;
             // } else if (gameStateDate===this.state.yesterdate && gameState.solved === true) { /*TODO and we won yesterday */
             } else if (gameStateDate===this.state.yesterdate) { /* We deliberately count whether we played, not whether we won - or it would be a boring streak*/ 
                 _player_streak = gameState.player_stats.streak;
-                if (gameState.solved === true && gameState.player_stats.win_streak != undefined ) {
+                if (gameState.solved === true && gameState.player_stats.win_streak !== undefined ) {
                     _player_win_streak = gameState.player_stats.win_streak;
                 }
-            } else {
+            } else { // We did not play today and we did not play yesterday. Reset streaks.
                 _player_streak = 0;
                 _player_win_streak = 0;
             }
@@ -227,11 +243,12 @@ class Semantle extends React.Component {
         
     }
 
-    addWord(new_guess) {
+    addWord(new_guess, remaining_hints) {
         let _guess_number = this.state.guess_number;
         let _solved = this.state.solved;
         let updated_guesses = this.state.guesses;
         let _player_stats = this.state.player_stats;
+        let _closest_guess_rank = this.state.closest_guess_rank;
 
         if (new_guess in this.state.word_database){
             _guess_number += 1;
@@ -240,14 +257,24 @@ class Semantle extends React.Component {
                 updated_guesses[new_guess] =
                     {
                         guess_number: _guess_number,
-                        w: new_guess,
-                        s: this.state.word_database[new_guess].s,
-                        r: this.state.word_database[new_guess].r,
+                        w: new_guess, // Word
+                        s: this.state.word_database[new_guess].s, // Score
+                        r: this.state.word_database[new_guess].r, // Ranking
                     }
+                _closest_guess_rank = Math.min(_closest_guess_rank,this.state.word_database[new_guess].r);
+                if (_closest_guess_rank === 1) { // No more hints after you get within one of the answer
+                    remaining_hints = 0;
+                    this.setState(
+                        {
+                            remaining_hints: 0,
+                        }
+                    )
+                }
                 this.setState(
                     {
                         guess_number: _guess_number,
                         guesses: updated_guesses,
+                        closest_guess_rank: _closest_guess_rank,
                     }
                 )
                 if (!_solved && this.state.guesses[new_guess]["r"] === 0){
@@ -273,14 +300,16 @@ class Semantle extends React.Component {
             });
             // this.saveProgress();
             const gameState = {
-            date: this.state.date,
-            guesses: updated_guesses,
-            latest_guess: new_guess,
-            guess_number: _guess_number,
-            solved: _solved,
-            player_stats: _player_stats,
-            guesses_to_solve: ((!_solved && this.state.guesses[new_guess]["r"] === 0)? _guess_number : this.state.guesses_to_solve),
-        }
+                date: this.state.date,
+                guesses: updated_guesses,
+                latest_guess: new_guess,
+                guess_number: _guess_number,
+                solved: _solved,
+                player_stats: _player_stats,
+                guesses_to_solve: ((!_solved && this.state.guesses[new_guess]["r"] === 0)? _guess_number : this.state.guesses_to_solve),
+                remaining_hints: remaining_hints, // TODO this updates one time step late...
+                closest_guess_rank: _closest_guess_rank,
+            }
         localStorage.setItem("gameState", JSON.stringify(gameState));
         } else {
             this.setState(
@@ -295,14 +324,29 @@ class Semantle extends React.Component {
 
     handleSubmit(new_submission) {
         let new_guess = new_submission.target.guess.value.toLowerCase().trim();
-        this.addWord(new_guess);
+        this.addWord(new_guess, this.state.remaining_hints);
         new_submission.preventDefault();
         new_submission.target.guess.value="";
     }
 
+    handleHint(new_submission) {
+        // let new_guess = "limone";
+        let best_rank_so_far = this.state.closest_guess_rank;
+        let hint_rank = Math.max(1,Math.min(950,Math.round(2/3*best_rank_so_far)));
+        let new_guess = this.state.closest_words_list[hint_rank]['w'];
+        let new_remaining_hints = this.state.remaining_hints-1;
+        this.setState(
+            {
+                remaining_hints: new_remaining_hints
+            }
+        )
+        this.addWord(new_guess, new_remaining_hints);
+        new_submission.preventDefault();
+    }
+
     handleChange(new_submission) {
         let new_guess = new_submission.target.value;
-        this.addWord(new_guess);
+        this.addWord(new_guess,this.state.remaining_hints);
         new_submission.preventDefault();
     }
 
@@ -356,6 +400,11 @@ class Semantle extends React.Component {
                         input_updater={this.handleSubmit}
                         // on_change_updater={this.handleChange}
                     />
+                    <SemantleHintsForm
+                        new_hint_creator={this.handleHint}
+                        remaining_hints={this.state.remaining_hints}
+                        max_hints={this.state.max_hints}
+                    />
 
                     <SemantleStatus 
                     semantle_status_props={{
@@ -381,7 +430,7 @@ class Semantle extends React.Component {
                 <br/>
                 <br/>
                 <form onSubmit={this.resetHistory}>
-                    <input id="reset_button" type="submit" value=" ⚠️ Reset ⚠️"/>
+                    <input id="reset_button" type="submit" value=" ⚠️ Reset ⚠️" title="Elimina tutti i dati, inclusa la storia delle partite passate."/>
                 </form>
                 <div style={{fontSize: "15%", margin: "0 auto", display: "block",}}> Made with ❤️ by <a href="https://www.federico.io">Federico</a>.</div>
             </div>

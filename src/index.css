@@ -54,11 +54,38 @@ form {
   width: 80%;
   min-height: 1.5em;
   font-size: 1.2em;
+  border-radius: 0.375rem;
 }
+#guess_button, #hint_button, #reset_button {
+  border-radius: 0.375rem;
+}
+
 #guess_button {
   width: 15%;
-  min-height: 1.5em;
+  min-height: 1.8em;
   font-size: 1.2em;
+  background-color: green;
+  color: aliceblue;
+}
+
+#hint_button {
+  min-height: 1.8em;
+  font-size: 1em;
+  background-color:lightgreen;
+}
+
+#hint_form {
+  min-height: 1.8em;
+}
+
+#hint_div {
+  text-align: center;
+}
+
+#reset_button {
+  min-height: 1em;
+  font-size: .8em;
+  border-radius: 0.375rem;
 }
 
 #share_button{
@@ -71,6 +98,8 @@ form {
   
   margin:0 auto;
   display:block;
+
+  border-radius: 0.375rem;
 }
 
 .styled-table {

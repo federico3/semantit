@@ -2,6 +2,7 @@
   "name": "semantle",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@datapunt/matomo-tracker-react": "^0.5.1",
     "@jonkoops/matomo-tracker-react": "^0.7.0",

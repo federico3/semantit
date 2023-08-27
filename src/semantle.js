@@ -430,9 +430,9 @@ class Semantle extends React.Component {
                 </div>
                 <br/>
                 <br/>
-                <form onSubmit={this.resetHistory}>
+                {/* <form onSubmit={this.resetHistory}>
                     <input id="reset_button" type="submit" value=" ⚠️ Reset ⚠️" title="Elimina tutti i dati, inclusa la storia delle partite passate."/>
-                </form>
+                </form> */}
                 <div style={{fontSize: "15%", margin: "0 auto", display: "block",}}> Made with ❤️ by <a href="https://www.federico.io">Federico</a>.</div>
             </div>
         );

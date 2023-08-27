@@ -20,6 +20,7 @@ const SemantleGuesses = ({guesses_dict, latest_guess}) =>
             semantle_word_guess={guess}
             number={guess.guess_number}
             highlight={latest_guess===guess.w}
+            hint={guess.hinted}
         />
         )
     
@@ -30,6 +31,7 @@ const SemantleGuesses = ({guesses_dict, latest_guess}) =>
             semantle_word_guess={guesses_dict[latest_guess]}
             number={guesses_dict[latest_guess].guess_number}
             highlight={true}
+            hint={false} // The hint is actually always on top, so this case never happens
         />
     }
 
@@ -70,10 +72,10 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
         <SemantleGuess key={guess.r}
             semantle_word_guess={guess}
             number={guess.w in guesses? guesses[guess.w].guess_number : ""}
-            highlight={guess.w in guesses}
+            highlight={guess.w in guesses} // If in guesses and hinted, return 2. If in guesses and not hinted, return 1. Else return 0
+            hint={(guess.w in guesses) ? (guesses[guess.w].hinted === true ? true: false) : false}
         />
         )
-
     const { width, height } = useWindowSize();
     // const {scrollX, scrollY} = useWindowScroll();
 
@@ -120,7 +122,7 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
             </div>
 
             <div id="similar-words">
-                Ecco le cento parole più vicine a "{correct_word}":
+                Ecco le mille parole più vicine a "{correct_word}":
                 <button type="button" className="collapsible" onClick={
                     (_sub)=>{
                         toggle_similar_words_display();

@@ -243,7 +243,7 @@ class Semantle extends React.Component {
         
     }
 
-    addWord(new_guess, remaining_hints) {
+    addWord(new_guess, remaining_hints, is_this_a_hint) {
         let _guess_number = this.state.guess_number;
         let _solved = this.state.solved;
         let updated_guesses = this.state.guesses;
@@ -260,9 +260,10 @@ class Semantle extends React.Component {
                         w: new_guess, // Word
                         s: this.state.word_database[new_guess].s, // Score
                         r: this.state.word_database[new_guess].r, // Ranking
+                        hinted: is_this_a_hint, // Whether the word was hinted or not
                     }
                 _closest_guess_rank = Math.min(_closest_guess_rank,this.state.word_database[new_guess].r);
-                if (_closest_guess_rank === 1) { // No more hints after you get within one of the answer
+                if (_closest_guess_rank <= 1) { // No more hints after you get within one of the answer
                     remaining_hints = 0;
                     this.setState(
                         {
@@ -311,20 +312,20 @@ class Semantle extends React.Component {
                 closest_guess_rank: _closest_guess_rank,
             }
         localStorage.setItem("gameState", JSON.stringify(gameState));
-        } else {
+        } else if (new_guess.length>0){
             this.setState(
                 {
                     error: "Non conosco la parola " +new_guess + ".",
                     info: null,
                 }
             )
-        }
+        } // Else do nothing if an empty word is submitted by accident
 
     }
 
     handleSubmit(new_submission) {
         let new_guess = new_submission.target.guess.value.toLowerCase().trim();
-        this.addWord(new_guess, this.state.remaining_hints);
+        this.addWord(new_guess, this.state.remaining_hints, false);
         new_submission.preventDefault();
         new_submission.target.guess.value="";
     }
@@ -340,15 +341,15 @@ class Semantle extends React.Component {
                 remaining_hints: new_remaining_hints
             }
         )
-        this.addWord(new_guess, new_remaining_hints);
+        this.addWord(new_guess, new_remaining_hints, true);
         new_submission.preventDefault();
     }
 
-    handleChange(new_submission) {
-        let new_guess = new_submission.target.value;
-        this.addWord(new_guess,this.state.remaining_hints);
-        new_submission.preventDefault();
-    }
+    // handleChange(new_submission) {
+    //     let new_guess = new_submission.target.value;
+    //     this.addWord(new_guess,this.state.remaining_hints);
+    //     new_submission.preventDefault();
+    // }
 
     resetHistory(new_submission){
         localStorage.clear();

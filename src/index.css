@@ -159,6 +159,10 @@ form {
   font-weight: bold;
   color: blue;
 }
+
+.guesses_hinted{
+  color:darkcyan;
+}
 @media (prefers-color-scheme: dark) {
   .guesses{
     color: antiquewhite;
@@ -166,6 +170,10 @@ form {
   
   .guesses_highlighted{
     color:chartreuse;
+  }
+
+  .guesses_hinted{
+    color:aquamarine;
   }
 }
 

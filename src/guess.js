@@ -39,16 +39,24 @@ const ProgressWidget = ({rank}) =>
     }   
 }
 
-const SemantleGuess = ({semantle_word_guess, number, highlight}) =>
+const SemantleGuess = ({semantle_word_guess, number, highlight, hint}) =>
 {
     let font_weight = "normal";
     let font_color = "#000"
     let guess_class="guesses"
     if (highlight){
-        font_weight = "bold";
-        font_color = "rgb(0 0 255)"
+        // font_weight = "bold";
+        // font_color = "rgb(0 0 255)"
         guess_class="guesses guesses_highlighted"
     }
+    if (hint) {
+        guess_class += " guesses_hinted"
+    }
+    // else if (highlight === 2) {
+    //     // font_weight = "bold";
+    //     // font_color = "rgb(0 255 255)"
+    //     guess_class="guesses guesses_highlighted guesses_hinted"
+    // } 
     return(
         <tr key={semantle_word_guess.r}>
             <th className={guess_class} key="guess_number" >{number}</th>{/*Guess number*/}

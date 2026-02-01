@@ -4,6 +4,8 @@ import {SemantleStatus, SemantleInfo} from './semantle_status';
 import SemantleInputForm from './input_form';
 import SemantleHintsForm from './hints_form';
 import DatePicker from "react-datepicker";
+// import { formatInTimeZone } from 'date-fns-tz';
+import { format } from "date-fns";
 import MatomoTracker from '@jonkoops/matomo-tracker';
 
 // import { toHaveStyle } from '@testing-library/jest-dom/dist/matchers';
@@ -16,10 +18,12 @@ class Semantle extends React.Component {
         // const { trackPageView, trackEvent } = useMatomo();
         this.tracker = new MatomoTracker({urlBase: 'https://matomo.federico.io/matomo/', siteId: 2})
         const date = new Date();
-        const dateiso = date.toISOString().slice(0,10);
+        // const dateiso = date.toISOString().slice(0,10);
+        const dateiso = format(date, "yyyy-MM-dd")
         const yesterdays_date = new Date();
         yesterdays_date.setDate(date.getDate()-1);
-        const yesterdays_date_iso = yesterdays_date.toISOString().slice(0,10);
+        // const yesterdays_date_iso = yesterdays_date.toISOString().slice(0,10);
+        const yesterdays_date_iso = format(yesterdays_date, "yyyy-MM-dd")
         // let datestr = today.toString();
 
         // React.useEffect(() => {
@@ -64,10 +68,13 @@ class Semantle extends React.Component {
         }
 
         // this.handleChange = this.handleChange.bind(this);
+        // Give functions the class's context
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleHint = this.handleHint.bind(this);
         this.updateDateData = this.updateDateData.bind(this);
         this.handleDatePick = this.handleDatePick.bind(this);
+
+        // Create a ref we can scroll to
         this.solutionInformationRef = React.createRef();
     }
 
@@ -88,16 +95,6 @@ class Semantle extends React.Component {
         (error) => {
             console.log(error);
             this.setState({
-            //     word_database: {},
-            //     closest_words_list: [],
-            //     solution_word: "",
-            //     info: "",
-            //     day_stats: {
-            //         puzzle_number: 10,
-            //         nearest_word_similarity: 37,
-            //         tenth_nearest_word_similarity: 21,
-            //         thousandth_nearest_word_similarity: 5,
-            //     },
                 error: "Errore nel caricare le parole di oggi! " + error
             });
         }
@@ -130,9 +127,6 @@ class Semantle extends React.Component {
         if (gameState_raw !== null){
             const gameState = JSON.parse(gameState_raw);
             if (gameState){
-                const gameStateDate = gameState.date;
-                // let _player_streak = 0;
-                // let _player_win_streak = 0;
                 let _remaining_hints = this.state.max_hints;
                 let _closest_guess_rank = 100000;
 
@@ -153,26 +147,20 @@ class Semantle extends React.Component {
                         closest_guess_rank: _closest_guess_rank,
                     }
                 )
-
-                // _player_streak = gameState.player_stats.streak;
-                // _player_win_streak = gameState.player_stats.win_streak;
-
-
-                // let _player_stats= {
-                //     days_played: gameState.player_stats.days_played,
-                //     mean_number_of_guesses: gameState.player_stats.mean_number_of_guesses,
-                //     min_number_of_guesses: gameState.player_stats.min_number_of_guesses,
-                //     max_number_of_guesses: gameState.player_stats.max_number_of_guesses,
-                //     streak: _player_streak,
-                //     win_streak: _player_win_streak,
-                // }
-                // this.setState(
-                //     {
-                //         player_stats: _player_stats
-                //     }
-                // )
             } else {
                 console.log("I could not parse a game state for "+new_date)
+                this.setState(
+                    {
+                        guesses: {},
+                        latest_guess: "",
+                        guess_number: 0,
+                        solved: false,
+                        guesses_to_solve: -1,
+                        closest_guess_rank: 100000,
+                        display_similar_words: "none",
+                        remaining_hints: 4,
+                    }
+                )
             }
         } else { 
             // First time we play this day
@@ -189,8 +177,7 @@ class Semantle extends React.Component {
                 }
             )
 
-            // TODO player stats...
-
+        // Player stats
         }
         const playerStats_raw = localStorage.getItem("playerStats");
         if (playerStats_raw !== null){
@@ -227,78 +214,13 @@ class Semantle extends React.Component {
                     player_stats: _player_stats
                 }
             )
-            // TODO player stats...
-
         }
 
     }
 
     componentDidMount() {
-        // const default_init=false;
         this.tracker.trackPageView({});
         
-        // if (default_init) {
-        //     this.setState(
-        //         {
-        //             word_database: {
-        //                 "maple":
-        //                     {
-        //                         s:100,
-        //                         r: 0,
-        //                     },
-        //                 "aaron":
-        //                     {
-        //                         s: 3,
-        //                         r: 300,
-        //                     },
-        //                 "acorn":
-        //                     {
-        //                         s: -1,
-        //                         r: 1200,
-        //                     },
-        //                 "tepid": 
-        //                     {
-        //                         s: 17.2,
-        //                         r: 50,
-        //                     },
-        //             },
-        //             closest_words_list: [
-        //                     {
-        //                         w: "maple",
-        //                         s:100,
-        //                         r: 0,
-        //                     },
-        //                     {
-        //                         w: "tepid",
-        //                         s: 17.2,
-        //                         r: 50,
-        //                     },
-        //                     {
-        //                         w: "aaron",
-        //                         s: 3,
-        //                         r: 300,
-        //                     },
-
-        //                     {
-        //                         w: "acorn",
-        //                         s: -1,
-        //                         r: 1200,
-        //                     },
-        //                 ],
-        //             solution_word: "",
-        //             info: "Fetched DB locally",
-        //             day_stats: {
-        //                 puzzle_number: -1,
-        //                 nearest_word_similarity: -1,
-        //                 tenth_nearest_word_similarity: -1,
-        //                 thousandth_nearest_word_similarity: -1,
-        //             },
-        //             yesterdays_word: "la parola locale di ieri",
-        //             yesterdays_words: "le dieci parole locali di ieri",
-        //         },
-        //     )
-        // } else {
-
         // Attempt to load the old game state for transition purposes
         const gameState_legacy_raw = localStorage.getItem("gameState");
         if (gameState_legacy_raw !== null){
@@ -391,7 +313,7 @@ class Semantle extends React.Component {
         let _solved_dates = []
         for (var _ix =0; _ix < localStorage.length; _ix++){
             let _key = localStorage.key(_ix)
-            if ((_key.length>=9) & _key.slice(0,9) == "gameState"){
+            if ((_key.length>=9) & _key.slice(0,9) === "gameState"){
                 let _date = _key.slice(-10)
                 _solved_dates.push(new Date(_date))
                 const gameState = JSON.parse(localStorage.getItem(_key));
@@ -403,17 +325,16 @@ class Semantle extends React.Component {
                     _player_stats.min_number_of_guesses = Math.min(_number_of_guesses, _player_stats.min_number_of_guesses);
                     _player_stats.mean_number_of_guesses += _number_of_guesses
                 }
-            } // else {
-                // console.log("Bad key: "+_key+" (slice "+ _key.slice(0,9) +" )")
-            // }
+            } 
         }
         _player_stats.mean_number_of_guesses /= _player_stats.days_won
 
         const date = new Date();
-        const dateiso = date.toISOString().slice(0,10);
         
         let query_date = new Date(); // Init to today
-        let query_date_str = query_date.toISOString().slice(0,10);
+        // let query_date_str = query_date.toISOString().slice(0,10);
+        let query_date_str = format(query_date, "yyyy-MM-dd")
+        
 
         let backward_index = 0
         let in_streak = true
@@ -430,10 +351,11 @@ class Semantle extends React.Component {
                 in_streak = false
             }
             query_date.setDate(date.getDate()+backward_index);
-            query_date_str = query_date.toISOString().slice(0,10);
+            // query_date_str = query_date.toISOString().slice(0,10);
+            query_date_str = format(query_date, "yyyy-MM-dd")
         }
-        console.log("Here are the statistics!")
-        console.log(_player_stats)
+        // console.log("Here are the statistics!")
+        // console.log(_player_stats)
         this.setState({
             playerStats: _player_stats,
             solved_dates: _solved_dates
@@ -488,7 +410,9 @@ class Semantle extends React.Component {
                 // Play streak: iterate backwards based on number of files stored. BUT only if played same-day?
                 // Win streak: iterate backwards based on number of files stored AND won.
                 // Mean guesses: ONLY USE THE DATES FOR WHICH WE WON!
-                // Also display 
+                // Actually we got rid of all of this and just compute the statistics from 
+                // localStorage directly.
+                // Which is inefficient and we may have to revisit some day
                 if (!_solved && this.state.guesses[new_guess]["r"] === 0){
                     _solved = true;
 
@@ -515,7 +439,9 @@ class Semantle extends React.Component {
             this.setState({
                 error: null,
             });
-            const live_mode = (this.state.date == new Date().toISOString().slice(0,10))
+            // We save whether we are solving a puzzle ON THE DAY OF. If not, that won't count toward the streak.
+            // const live_mode = (this.state.date == new Date().toISOString().slice(0,10))
+            const live_mode = (this.state.date === format(new Date(), "yyyy-MM-dd"))
             // this.saveProgress();
             const gameState = {
                 date: this.state.date,
@@ -565,22 +491,25 @@ class Semantle extends React.Component {
         new_submission.preventDefault();
     }
 
-    // handleChange(new_submission) {
-    //     let new_guess = new_submission.target.value;
-    //     this.addWord(new_guess,this.state.remaining_hints);
-    //     new_submission.preventDefault();
-    // }
-
     resetHistory(new_submission){
         localStorage.clear();
     }
 
     handleDatePick(selected_date){
         // const date = new Date();
-        const dateiso = selected_date.toISOString().slice(0,10);
+        // let selected_date_utc = new Date(selected_date + selected_date.getTimezoneOffset() * 60000)
+        let selected_date_utc = selected_date
+        console.log("Selected date (UTC): "+selected_date_utc)
+        // const dateiso = selected_date.toISOString().slice(0,10);
+        // console.log("Selected date (ISO): "+selected_date.toISOString())
+        // console.log("Selected date (ISO truncated): "+dateiso)
+
+        const dateiso = format(selected_date_utc, "yyyy-MM-dd")
+        console.log("Selected date (ISO new): "+dateiso)
         const yesterdays_date = new Date();
         yesterdays_date.setDate(selected_date.getDate()-1);
-        const yesterdays_date_iso = yesterdays_date.toISOString().slice(0,10);
+        // const yesterdays_date_iso = yesterdays_date.toISOString().slice(0,10);
+        const yesterdays_date_iso = format(yesterdays_date, "yyyy-MM-dd")
         this.setState(
             {
                 date: dateiso,
@@ -618,11 +547,12 @@ class Semantle extends React.Component {
                 <div className="datepicker">
                     <DatePicker
                         showIcon
-                        selected={this.state.date}
+                        selected={new Date(new Date(this.state.date).getTime() + new Date(this.state.date).getTimezoneOffset() * 60000)}
                         onChange={this.handleDatePick}
-                        minDate="2022-09-09"
+                        minDate="2022-09-09" // We never created the files for dates prior to this
                         maxDate={new Date()}
                         highlightDates={this.state.solved_dates}
+                        timeZone="UTC"
                         />
                 </div>
                 <div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SemantleGuess from './guess';
 import useWindowSize from 'react-use/lib/useWindowSize'
-import useWindowScroll from 'react-use/lib/useWindowScroll'
+// import useWindowScroll from 'react-use/lib/useWindowScroll'
 import Confetti from 'react-confetti'
 
 const SemantleGuesses = ({guesses_dict, latest_guess}) =>

@@ -6,15 +6,15 @@
   "dependencies": {
     "@datapunt/matomo-tracker-react": "^0.5.1",
     "@jonkoops/matomo-tracker-react": "^0.7.0",
-    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "react": "^18.2.0",
-    "react-confetti": "^6.1.0",
+    "react": "^18.3.1",
+    "react-confetti": "^6.4.0",
     "react-datepicker": "^9.1.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
-    "react-use": "^17.4.0",
+    "react-use": "^17.6.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

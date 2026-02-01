@@ -87,8 +87,6 @@ const SemantleGuessed = ({correct_word, guesses, closest_words_list, puzzle_numb
     // setInterval(()=>{setCelebrate(true)},confetti_delay_ms);
     setInterval(()=>{setCelebrate(false)},confetti_duration_ms);
 
-
-
     return (
         <div id="solution">
             <Confetti

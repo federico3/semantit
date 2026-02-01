@@ -379,7 +379,7 @@ class Semantle extends React.Component {
 
     computeStatistics(){
         let _player_stats = {
-            days_played: localStorage.length,
+            days_played: localStorage.length-1,
             days_won: 0,
             mean_number_of_guesses: 0,
             min_number_of_guesses: Number.MAX_SAFE_INTEGER,
@@ -416,21 +416,24 @@ class Semantle extends React.Component {
         let query_date_str = query_date.toISOString().slice(0,10);
 
         let backward_index = 0
-        while (localStorage.getItem("gameState_"+query_date_str) !== null){
+        let in_streak = true
+        while (in_streak & (localStorage.getItem("gameState_"+query_date_str) !== null)){
             backward_index -= 1
-            _player_stats.streak += 1
-            if (_player_stats.win_streak == _player_stats.streak-1){
-                const gameState = JSON.parse(localStorage.getItem("gameState_"+query_date_str))
-                const _solved = gameState.solved
-                if (_solved){
+            const gameState = JSON.parse(localStorage.getItem("gameState_"+query_date_str))
+            const live_mode = gameState.live_mode
+            if (live_mode){
+                _player_stats.streak += 1
+                if (gameState.solved){
                     _player_stats.win_streak += 1
                 }
+            } else {
+                in_streak = false
             }
             query_date.setDate(date.getDate()+backward_index);
             query_date_str = query_date.toISOString().slice(0,10);
         }
-        // console.log("Here are the statistics!")
-        // console.log(_player_stats)
+        console.log("Here are the statistics!")
+        console.log(_player_stats)
         this.setState({
             playerStats: _player_stats,
             solved_dates: _solved_dates
@@ -512,6 +515,7 @@ class Semantle extends React.Component {
             this.setState({
                 error: null,
             });
+            const live_mode = (this.state.date == new Date().toISOString().slice(0,10))
             // this.saveProgress();
             const gameState = {
                 date: this.state.date,
@@ -519,13 +523,14 @@ class Semantle extends React.Component {
                 latest_guess: new_guess,
                 guess_number: _guess_number,
                 solved: _solved,
-                player_stats: _player_stats,
+                // player_stats: _player_stats,
                 guesses_to_solve: ((!_solved && this.state.guesses[new_guess]["r"] === 0)? _guess_number : this.state.guesses_to_solve),
                 remaining_hints: remaining_hints, // TODO this updates one time step late...
                 closest_guess_rank: _closest_guess_rank,
+                live_mode: live_mode
             }
         localStorage.setItem("gameState_"+this.state.date, JSON.stringify(gameState));
-        localStorage.setItem("playerStats", JSON.stringify(gameState.player_stats));
+        localStorage.setItem("playerStats", JSON.stringify(_player_stats));
 
         } else if (new_guess.length>0){
             this.setState(
